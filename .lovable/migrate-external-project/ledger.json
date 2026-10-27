@@ -1,0 +1,4 @@
+[{"capability":"code","source":"vanilla HTML/JS PWA","outcome":"ported to TanStack route","status":"verified","next_action":null},
+{"capability":"records","source":"browser localStorage only","outcome":"same keys kept, existing device data still loads on same origin only","status":"accepted","next_action":null},
+{"capability":"auth/schema/secrets/endpoints","source":"none","outcome":"absent","status":"verified","next_action":null},
+{"capability":"service worker/offline + Android Capacitor build","source":"sw.js, capacitor","outcome":"not carried over (conflicts with preview); icons missing from archive","status":"pending","next_action":"ask user if offline/Android app is needed"}]

@@ -1,24 +1,27 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
+import legacyCss from "@/legacy/don-cangrejo.css?url";
+import { markup } from "@/legacy/markup";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "La Receta de Don Cangrejo - Longaniza Pro MX" },
+      { name: "description", content: "Calculadora y control de producción profesional de longaniza y charcutería." },
+      { property: "og:title", content: "La Receta de Don Cangrejo - Longaniza Pro MX" },
+      { property: "og:description", content: "Calculadora y control de producción de longaniza: premix, costeo, checklist e historial." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "theme-color", content: "#0c0e12" },
+    ],
+    links: [{ rel: "stylesheet", href: legacyCss }],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+  useEffect(() => {
+    import("@/legacy/don-cangrejo.js").then((m) => m.initDonCangrejo());
+  }, []);
+  return <div dangerouslySetInnerHTML={{ __html: markup }} />;
 }

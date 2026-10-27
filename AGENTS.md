@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- The Don Cangrejo app logic lives in src/legacy (vanilla JS + CSS rendered by src/routes/index.tsx); keep its localStorage keys unchanged so saved prices/history survive.
