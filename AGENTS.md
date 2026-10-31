@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - The Don Cangrejo app logic lives in src/legacy (vanilla JS + CSS rendered by src/routes/index.tsx); keep its localStorage keys unchanged so saved prices/history survive.
+- Android APKs use scripts/prepare-android.ts to package the same legacy assets in an isolated Capacitor workspace under /tmp; this keeps native builds independent of the hosted TanStack app and avoids service workers in preview.

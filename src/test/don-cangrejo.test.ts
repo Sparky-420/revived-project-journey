@@ -1,5 +1,4 @@
 import { describe, it, expect } from "vitest";
-// @ts-expect-error legacy js module
 import { DEFAULTS, calculateActiveBatch, calculatePremixBulk, isPremixValid } from "@/legacy/don-cangrejo.js";
 
 describe("Don Cangrejo formulas", () => {
