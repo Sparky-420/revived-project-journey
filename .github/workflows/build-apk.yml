@@ -19,13 +19,13 @@ jobs:
           bun-version: latest
 
       - name: Configurar Java 17
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
       - name: Configurar Android SDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
 
       - name: Preparar proyecto Capacitor
         run: |
