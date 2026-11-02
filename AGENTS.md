@@ -9,5 +9,7 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- The Don Cangrejo app logic lives in src/legacy (vanilla JS + CSS rendered by src/routes/index.tsx); keep its localStorage keys unchanged so saved prices/history survive.
-- Android APKs use scripts/prepare-android.ts to package the same legacy assets in an isolated Capacitor workspace under /tmp; this keeps native builds independent of the hosted TanStack app and avoids service workers in preview.
+- Roles live in public.user_roles (owner/supervisor/operator) and permissions in src/lib/roles.ts; UI hides locked modules but RLS must enforce every write.
+- Base formulas and plant rules (premix, phase 2, cold-room traffic light, yield) live in src/lib/formula.ts with tests in src/test/rules.test.ts.
+- PIN/biometric quick unlock is device-local (src/lib/quick-lock.ts) on top of the Google session; it is a convenience lock, not the security boundary.
+- Android APKs use scripts/prepare-android.ts to build an isolated Capacitor shell under /tmp that loads the published app URL, because login and shared data need the online backend.

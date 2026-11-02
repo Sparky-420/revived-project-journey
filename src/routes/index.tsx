@@ -1,27 +1,28 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
-import legacyCss from "@/legacy/don-cangrejo.css?url";
-import { markup } from "@/legacy/markup";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "La Receta de Don Cangrejo - Longaniza Pro MX" },
-      { name: "description", content: "Calculadora y control de producción profesional de longaniza y charcutería." },
-      { property: "og:title", content: "La Receta de Don Cangrejo - Longaniza Pro MX" },
-      { property: "og:description", content: "Calculadora y control de producción de longaniza: premix, costeo, checklist e historial." },
+      { title: "Don Cangrejo Pro · Control de planta de longaniza" },
+      { name: "description", content: "Curado, cámara fría, molienda, inventario y rendimiento de longaniza por roles." },
+      { property: "og:title", content: "Don Cangrejo Pro · Control de planta" },
+      { property: "og:description", content: "Producción de longaniza en dos fases con trazabilidad y roles." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "theme-color", content: "#0c0e12" },
     ],
-    links: [{ rel: "stylesheet", href: legacyCss }],
   }),
   component: Index,
 });
 
 function Index() {
-  useEffect(() => {
-    import("@/legacy/don-cangrejo.js").then((m) => m.initDonCangrejo());
-  }, []);
-  return <div dangerouslySetInnerHTML={{ __html: markup }} />;
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background px-6 text-center">
+      <div className="text-5xl">🥩</div>
+      <h1 className="text-4xl font-black tracking-tight text-foreground">Don Cangrejo Pro</h1>
+      <p className="max-w-sm text-muted-foreground">
+        Fase 1 de curado, cámara fría, Fase 2 de molienda y embutido, inventario y rendimiento — con acceso por rol.
+      </p>
+      <Link to="/panel" className="rounded-xl bg-primary px-8 py-4 font-bold text-primary-foreground">Entrar a planta</Link>
+    </main>
+  );
 }
