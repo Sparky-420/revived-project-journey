@@ -142,3 +142,24 @@
     color: var(--color-foreground);
   }
 }
+
+/* Don Cangrejo: smoked-meat dark theme with chile-red primary */
+.dark {
+  --background: oklch(0.17 0.012 40);
+  --foreground: oklch(0.95 0.01 70);
+  --card: oklch(0.22 0.015 40);
+  --card-foreground: oklch(0.95 0.01 70);
+  --popover: oklch(0.22 0.015 40);
+  --popover-foreground: oklch(0.95 0.01 70);
+  --primary: oklch(0.63 0.2 32);
+  --primary-foreground: oklch(0.98 0.01 70);
+  --secondary: oklch(0.28 0.02 40);
+  --secondary-foreground: oklch(0.95 0.01 70);
+  --muted: oklch(0.26 0.015 40);
+  --muted-foreground: oklch(0.7 0.02 60);
+  --accent: oklch(0.78 0.15 75);
+  --accent-foreground: oklch(0.17 0.012 40);
+  --border: oklch(0.32 0.02 40);
+  --input: oklch(0.32 0.02 40);
+  --ring: oklch(0.63 0.2 32);
+}
