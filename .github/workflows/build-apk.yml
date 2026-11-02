@@ -25,7 +25,7 @@ jobs:
           java-version: '17'
 
       - name: Configurar Android SDK
-        uses: actions/setup-java@v4
+        uses: 
 
       - name: Preparar proyecto Capacitor
         run: |
