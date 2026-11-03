@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      phase1_bags: {
+        Row: {
+          actual_weight_kg: number
+          bag_code: string
+          batch_id: string
+          created_at: string
+          entered_cold_room_at: string
+          id: string
+          status: string
+          target_weight_kg: number
+        }
+        Insert: {
+          actual_weight_kg: number
+          bag_code: string
+          batch_id: string
+          created_at?: string
+          entered_cold_room_at?: string
+          id?: string
+          status?: string
+          target_weight_kg: number
+        }
+        Update: {
+          actual_weight_kg?: number
+          bag_code?: string
+          batch_id?: string
+          created_at?: string
+          entered_cold_room_at?: string
+          id?: string
+          status?: string
+          target_weight_kg?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "phase1_bags_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "phase1_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      phase1_batches: {
+        Row: {
+          clean_weight_kg: number
+          created_at: string
+          gross_weight_kg: number
+          id: string
+          lot_number: string
+          operator_id: string
+          operator_name: string | null
+          premix_cure_salt_g: number
+          premix_dose_g_per_kg: number
+          premix_salt_g: number
+          premix_sugar_g: number
+          premix_total_g: number
+          waste_weight_kg: number
+        }
+        Insert: {
+          clean_weight_kg?: number
+          created_at?: string
+          gross_weight_kg: number
+          id?: string
+          lot_number: string
+          operator_id?: string
+          operator_name?: string | null
+          premix_cure_salt_g?: number
+          premix_dose_g_per_kg: number
+          premix_salt_g?: number
+          premix_sugar_g?: number
+          premix_total_g?: number
+          waste_weight_kg?: number
+        }
+        Update: {
+          clean_weight_kg?: number
+          created_at?: string
+          gross_weight_kg?: number
+          id?: string
+          lot_number?: string
+          operator_id?: string
+          operator_name?: string | null
+          premix_cure_salt_g?: number
+          premix_dose_g_per_kg?: number
+          premix_salt_g?: number
+          premix_sugar_g?: number
+          premix_total_g?: number
+          waste_weight_kg?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -58,6 +147,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      has_any_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

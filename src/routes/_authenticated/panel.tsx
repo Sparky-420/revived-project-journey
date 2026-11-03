@@ -19,8 +19,8 @@ export const Route = createFileRoute("/_authenticated/panel")({
   component: Panel,
 });
 
-const MODULES: { icon: string; title: string; desc: string; need: Permission }[] = [
-  { icon: "🧪", title: "Fase 1 · Recepción y Curado", desc: "Compra bruta, merma, premix y bolsas fechadas", need: "batches:capture" },
+const MODULES: { icon: string; title: string; desc: string; need: Permission; to?: "/fase1" }[] = [
+  { icon: "🧪", title: "Fase 1 · Recepción y Curado", desc: "Compra bruta, merma, premix y bolsas fechadas", need: "batches:capture", to: "/fase1" },
   { icon: "❄️", title: "Cámara Fría", desc: "Bolsas en reposo con semáforo 24–48 h", need: "batches:capture" },
   { icon: "🌶️", title: "Fase 2 · Molienda y Embutido", desc: "Sazón, agua helada y tabla de pesaje", need: "batches:capture" },
   { icon: "⚖️", title: "Rendimiento", desc: "Pesaje final en báscula vs. teórico", need: "batches:capture" },
@@ -65,13 +65,19 @@ function Panel() {
       <div className="grid gap-3 sm:grid-cols-2">
         {MODULES.map((m) => {
           const ok = can(m.need);
-          return (
-            <div key={m.title} className={`rounded-xl border border-border bg-card p-4 ${ok ? "" : "opacity-45"}`}>
+          const body = (
+            <>
               <div className="text-2xl">{ok ? m.icon : "🔒"}</div>
               <h2 className="mt-2 font-bold text-card-foreground">{m.title}</h2>
               <p className="text-sm text-muted-foreground">{ok ? m.desc : "Bloqueado para tu rol"}</p>
-              {ok && <p className="mt-2 text-xs text-muted-foreground">Próximamente</p>}
-            </div>
+              {ok && <p className="mt-2 text-xs text-muted-foreground">{m.to ? "Abrir →" : "Próximamente"}</p>}
+            </>
+          );
+          const cls = `rounded-xl border border-border bg-card p-4 ${ok ? "" : "opacity-45"}`;
+          return ok && m.to ? (
+            <Link key={m.title} to={m.to} className={`${cls} block hover:border-primary`}>{body}</Link>
+          ) : (
+            <div key={m.title} className={cls}>{body}</div>
           );
         })}
       </div>
