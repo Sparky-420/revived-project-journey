@@ -87,7 +87,7 @@ function Fase1() {
       bags.map((b, i) => ({ batch_id: batch.id, bag_code: `${lot}-B${i + 1}`, target_weight_kg: suggested[i] ?? n(b), actual_weight_kg: n(b) })),
     );
     setSaving(false);
-    if (e2) return toast.error("El lote se guardó pero las bolsas no");
+    if (e2) { toast.error("El lote se guardó pero las bolsas no"); return; }
     toast.success(`Lote ${lot} ingresado a Cámara Fría`);
     setGross(""); setWaste(""); setDose(15);
     qc.invalidateQueries({ queryKey: ["phase1"] });
