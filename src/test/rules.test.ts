@@ -41,3 +41,18 @@ describe("formula", () => {
     expect(yieldPct(22, 20)).toBeCloseTo(110);
   });
 });
+
+import { suggestBags, cleaningYieldPct } from "@/lib/formula";
+describe("phase 1", () => {
+  it("suggests 20 kg bags plus remainder", () => {
+    expect(suggestBags(57)).toEqual([20, 20, 17]);
+    expect(suggestBags(45)).toEqual([20, 20]);
+    expect(suggestBags(23)).toEqual([20, 3]);
+  });
+  it("bags sum to clean meat", () => {
+    expect(suggestBags(83.4).reduce((a, b) => a + b, 0)).toBeCloseTo(83.4);
+  });
+  it("cleaning yield", () => {
+    expect(cleaningYieldPct(50, 5)).toBeCloseTo(90);
+  });
+});

@@ -39,3 +39,25 @@ export function yieldPct(finishedKg: number, meatKg: number): number {
   if (meatKg <= 0) return 0;
   return (finishedKg / meatKg) * 100;
 }
+
+/**
+ * Suggest bag portions from standard sizes (20/17/15/10 kg).
+ * Greedy with largest bags; the last bag carries the remainder (may be smaller than 10 kg).
+ */
+export function suggestBags(cleanKg: number): number[] {
+  const bags: number[] = [];
+  let left = Math.round(cleanKg * 1000) / 1000;
+  const sizes = [...BAG_SIZES_KG].sort((a, b) => b - a);
+  while (left > 0.0005) {
+    const fit = sizes.find((s) => s <= left + 0.0005);
+    if (!fit) { bags.push(Math.round(left * 1000) / 1000); break; }
+    bags.push(fit);
+    left = Math.round((left - fit) * 1000) / 1000;
+  }
+  return bags;
+}
+
+export function cleaningYieldPct(grossKg: number, wasteKg: number): number {
+  if (grossKg <= 0) return 0;
+  return ((grossKg - wasteKg) / grossKg) * 100;
+}
