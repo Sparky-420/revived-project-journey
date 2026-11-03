@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated/equipo'
+import { Route as AuthenticatedFase1RouteImport } from './routes/_authenticated/fase1'
 import { Route as AuthenticatedPanelRouteImport } from './routes/_authenticated/panel'
 
 const IndexRoute = IndexRouteImport.update({
@@ -34,6 +35,11 @@ const AuthenticatedEquipoRoute = AuthenticatedEquipoRouteImport.update({
   path: '/equipo',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFase1Route = AuthenticatedFase1RouteImport.update({
+  id: '/fase1',
+  path: '/fase1',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPanelRoute = AuthenticatedPanelRouteImport.update({
   id: '/panel',
   path: '/panel',
@@ -44,12 +50,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/equipo': typeof AuthenticatedEquipoRoute
+  '/fase1': typeof AuthenticatedFase1Route
   '/panel': typeof AuthenticatedPanelRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/equipo': typeof AuthenticatedEquipoRoute
+  '/fase1': typeof AuthenticatedFase1Route
   '/panel': typeof AuthenticatedPanelRoute
 }
 export interface FileRoutesById {
@@ -58,19 +66,21 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/equipo': typeof AuthenticatedEquipoRoute
+  '/_authenticated/fase1': typeof AuthenticatedFase1Route
   '/_authenticated/panel': typeof AuthenticatedPanelRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/equipo' | '/panel'
+  fullPaths: '/' | '/auth' | '/equipo' | '/fase1' | '/panel'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/equipo' | '/panel'
+  to: '/' | '/auth' | '/equipo' | '/fase1' | '/panel'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/equipo'
+    | '/_authenticated/fase1'
     | '/_authenticated/panel'
   fileRoutesById: FileRoutesById
 }
@@ -110,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEquipoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/fase1': {
+      id: '/_authenticated/fase1'
+      path: '/fase1'
+      fullPath: '/fase1'
+      preLoaderRoute: typeof AuthenticatedFase1RouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/panel': {
       id: '/_authenticated/panel'
       path: '/panel'
@@ -122,11 +139,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedEquipoRoute: typeof AuthenticatedEquipoRoute
+  AuthenticatedFase1Route: typeof AuthenticatedFase1Route
   AuthenticatedPanelRoute: typeof AuthenticatedPanelRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEquipoRoute: AuthenticatedEquipoRoute,
+  AuthenticatedFase1Route: AuthenticatedFase1Route,
   AuthenticatedPanelRoute: AuthenticatedPanelRoute,
 }
 
