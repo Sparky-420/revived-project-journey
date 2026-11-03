@@ -22,7 +22,7 @@ function Index() {
       <p className="max-w-sm text-muted-foreground">
         Fase 1 de curado, cámara fría, Fase 2 de molienda y embutido, inventario y rendimiento — con acceso por rol.
       </p>
-      <Link to="/panel" className="rounded-xl bg-primary px-8 py-4 font-bold text-primary-foreground">Entrar a planta</Link>
+      <Link to="/panel" className="rounded-xl bg-primary px-8 py-4 font-bold text-primary-foreground">Entrar a producción</Link>
     </main>
   );
 }
