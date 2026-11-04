@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-auth";
-import { premixForMeat, suggestBags, cleaningYieldPct, PREMIX } from "@/lib/formula";
+import { premixForMeat, curedMassKg, bagWeightWithinTolerance, cleaningYieldPct, PREMIX, BAG_SIZES_KG } from "@/lib/formula";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/fase1")({
@@ -44,18 +45,24 @@ function Fase1() {
   const [waste, setWaste] = useState("");
   const [dose, setDose] = useState(15);
   const [bags, setBags] = useState<string[]>([]);
+  const [bagWeight, setBagWeight] = useState("");
   const [saving, setSaving] = useState(false);
 
   const grossKg = n(gross);
   const wasteKg = n(waste);
   const clean = Math.max(0, grossKg - wasteKg);
   const premix = premixForMeat(clean, dose);
-  const suggested = useMemo(() => suggestBags(clean), [clean]);
-
-  useEffect(() => setBags(suggested.map(String)), [suggested]);
+  const cured = curedMassKg(clean, premix.totalG);
 
   const bagTotal = bags.reduce((a, b) => a + n(b), 0);
-  const valid = grossKg > 0 && wasteKg < grossKg && bags.length > 0 && bags.every((b) => n(b) > 0);
+  const balanced = bagWeightWithinTolerance(bagTotal, cured);
+  const valid = grossKg > 0 && wasteKg < grossKg && bags.length > 0 && bags.every((b) => Number.isFinite(n(b)) && n(b) > 0) && balanced;
+
+  function addBag(weight: string) {
+    if (!Number.isFinite(n(weight)) || n(weight) <= 0) return;
+    setBags((xs) => [...xs, String(n(weight))]);
+    setBagWeight("");
+  }
 
   const recent = useQuery({
     queryKey: ["phase1"],
@@ -70,7 +77,7 @@ function Fase1() {
   });
 
   async function save() {
-    if (!valid) return;
+    if (!valid || saving || !can("batches:capture")) return;
     setSaving(true);
     const lot = lotCode();
     const { data: batch, error } = await supabase
@@ -84,12 +91,12 @@ function Fase1() {
       return;
     }
     const { error: e2 } = await supabase.from("phase1_bags").insert(
-      bags.map((b, i) => ({ batch_id: batch.id, bag_code: `${lot}-B${i + 1}`, target_weight_kg: suggested[i] ?? n(b), actual_weight_kg: n(b) })),
+      bags.map((b, i) => ({ batch_id: batch.id, bag_code: `${lot}-B${i + 1}`, target_weight_kg: n(b), actual_weight_kg: n(b) })),
     );
     setSaving(false);
     if (e2) { toast.error("El lote se guardó pero las bolsas no"); return; }
     toast.success(`Lote ${lot} ingresado a Cámara Fría`);
-    setGross(""); setWaste(""); setDose(15);
+    setGross(""); setWaste(""); setDose(15); setBags([]); setBagWeight("");
     qc.invalidateQueries({ queryKey: ["phase1"] });
   }
 
@@ -136,26 +143,39 @@ function Fase1() {
           <li className="flex justify-between"><span className="text-muted-foreground">Sal de cura Premier ({PREMIX.cura}%)</span><b className="text-foreground">{g(premix.curaG)}</b></li>
           <li className="flex justify-between"><span className="text-muted-foreground">Azúcar refinada ({PREMIX.azucar}%)</span><b className="text-foreground">{g(premix.azucarG)}</b></li>
           <li className="flex justify-between border-t border-border pt-1"><span className="font-bold text-foreground">Total premix</span><b className="text-primary">{g(premix.totalG)}</b></li>
+          <li className="flex flex-wrap justify-between gap-2 border-t border-border pt-2"><span className="font-bold text-foreground">Masa curada a refrigeración</span><b className="text-primary">{kg(cured)}</b></li>
         </ul>
       </section>
 
       <section className="mb-4 rounded-xl border border-border bg-card p-4">
         <h2 className="mb-1 font-bold text-card-foreground">3 · Porcionado en bolsas</h2>
-        <p className="mb-3 text-xs text-muted-foreground">Sugerido automáticamente; ajusta con el peso real de báscula.</p>
-        {bags.length === 0 && <p className="text-sm text-muted-foreground">Captura la compra para ver las bolsas.</p>}
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <fieldset disabled={saving} className="min-w-0 space-y-3">
+          <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); addBag(bagWeight); }}>
+            <label className="min-w-0 flex-1 text-sm text-muted-foreground">Peso de báscula (kg)
+              <input inputMode="decimal" className={input} value={bagWeight} onChange={(e) => setBagWeight(e.target.value)} placeholder="0.000" />
+            </label>
+            <Button type="submit" className="h-12" disabled={!Number.isFinite(n(bagWeight)) || n(bagWeight) <= 0}><Plus className="size-4" /> Agregar bolsa</Button>
+          </form>
+          <div className="flex flex-wrap gap-2">
+            {BAG_SIZES_KG.map((weight) => <Button key={weight} type="button" size="sm" variant="outline" onClick={() => addBag(String(weight))}><Plus className="size-3" />{weight} kg</Button>)}
+          </div>
+        <div className="space-y-2">
           {bags.map((b, i) => (
-            <label key={i} className="text-xs text-muted-foreground">Bolsa {i + 1} (sug. {suggested[i]} kg)
+            <div key={i} className="flex items-end gap-2">
+            <label className="min-w-0 flex-1 text-xs text-muted-foreground">Bolsa {i + 1} (kg)
               <input inputMode="decimal" className={input} value={b}
                 onChange={(e) => setBags((xs) => xs.map((x, j) => (j === i ? e.target.value : x)))} />
             </label>
+            <Button type="button" variant="outline" size="icon" className="mb-1 shrink-0" aria-label={`Eliminar bolsa ${i + 1}`} title={`Eliminar bolsa ${i + 1}`} onClick={() => setBags((xs) => xs.filter((_, j) => j !== i))}><Trash2 className="size-4" /></Button>
+            </div>
           ))}
         </div>
-        {bags.length > 0 && (
-          <p className={`mt-3 text-sm ${Math.abs(bagTotal - clean) > 0.05 ? "text-destructive" : "text-muted-foreground"}`}>
-            Total en bolsas: {kg(bagTotal)} de {kg(clean)}
-          </p>
-        )}
+        </fieldset>
+        <div aria-live="polite" className={`mt-3 space-y-1 text-sm ${bags.length > 0 && !balanced ? "text-destructive" : "text-muted-foreground"}`}>
+          <p>Total en bolsas: {kg(bagTotal)} de {kg(cured)}</p>
+          <p>{bagTotal > cured ? `Exceso: ${kg(bagTotal - cured)}` : `Faltan: ${kg(cured - bagTotal)}`}</p>
+          <p>Margen ±1%: {kg(cured * 0.01)}{balanced ? " · Dentro del margen" : ""}</p>
+        </div>
       </section>
 
       <Button className="w-full py-6 text-base" disabled={!valid || saving} onClick={save}>

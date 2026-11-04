@@ -42,11 +42,26 @@ describe("formula", () => {
   });
 });
 
-import { suggestBags, cleaningYieldPct } from "@/lib/formula";
+import { suggestBags, cleaningYieldPct, curedMassKg, bagWeightWithinTolerance } from "@/lib/formula";
 describe("phase 1", () => {
+  it("includes 3060 g of premix in 204 kg of meat before refrigeration", () => {
+    expect(curedMassKg(204, premixForMeat(204, 15).totalG)).toBeCloseTo(207.06);
+    expect(curedMassKg(152, premixForMeat(152, 15).totalG)).toBeCloseTo(154.28);
+  });
+  it("accepts inclusive ±1% and rejects weights outside that margin", () => {
+    expect(bagWeightWithinTolerance(207.06 * 0.99, 207.06)).toBe(true);
+    expect(bagWeightWithinTolerance(207.06 * 1.01, 207.06)).toBe(true);
+    expect(bagWeightWithinTolerance(207.06 * 0.9899, 207.06)).toBe(false);
+    expect(bagWeightWithinTolerance(207.06 * 1.0101, 207.06)).toBe(false);
+    expect(bagWeightWithinTolerance(204, 207.06)).toBe(false);
+    expect(bagWeightWithinTolerance(0, 0)).toBe(false);
+  });
+  it("accepts freely weighed bags rather than requiring standard sizes", () => {
+    expect(bagWeightWithinTolerance(11.234 + 143.046, curedMassKg(152, 2280))).toBe(true);
+  });
   it("suggests 20 kg bags plus remainder", () => {
     expect(suggestBags(57)).toEqual([20, 20, 17]);
-    expect(suggestBags(45)).toEqual([20, 20]);
+    expect(suggestBags(45)).toEqual([20, 20, 5]);
     expect(suggestBags(23)).toEqual([20, 3]);
   });
   it("bags sum to clean meat", () => {

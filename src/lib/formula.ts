@@ -15,6 +15,16 @@ export function premixForMeat(meatKg: number, doseGPerKg: number) {
   };
 }
 
+export function curedMassKg(cleanKg: number, premixG: number): number {
+  return cleanKg + premixG / 1000;
+}
+
+/** Inclusive ±1% scale tolerance around the cured mass. */
+export function bagWeightWithinTolerance(actualKg: number, expectedKg: number): boolean {
+  if (!Number.isFinite(actualKg) || !Number.isFinite(expectedKg) || actualKg <= 0 || expectedKg <= 0) return false;
+  return Math.abs(actualKg - expectedKg) <= expectedKg * 0.01 + Number.EPSILON * expectedKg * 4;
+}
+
 export function phase2ForMeat(meatKg: number, waterPct: number) {
   const g = meatKg * 1000;
   return {
