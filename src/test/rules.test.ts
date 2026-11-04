@@ -35,7 +35,7 @@ describe("formula", () => {
   it("orders cold room bags oldest first without modifying the source", () => {
     const bags = [{ id: "new", entered_cold_room_at: "2026-11-03T00:00:00Z" }, { id: "old", entered_cold_room_at: "2026-11-01T00:00:00Z" }];
     expect(fifoBags(bags).map((bag) => bag.id)).toEqual(["old", "new"]);
-    expect(bags[0].id).toBe("new");
+    expect(bags[0]?.id).toBe("new");
   });
   it("premix is 85/9/6 and sums 100", () => {
     expect(PREMIX.sal + PREMIX.cura + PREMIX.azucar).toBe(100);

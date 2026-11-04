@@ -6,6 +6,6 @@
 - [x] Envoltura Android que abre la app publicada.
 - [x] Fase 1: recepción, merma, premix y bolsas fechadas.
 - [x] Bolsas de peso libre, accesos rápidos y balance carne + premix con margen ±1%.
-- [ ] Cámara fría con semáforo: stock real, tiempos, búsqueda y enlace desde panel.
+- [x] Cámara fría con semáforo: stock real, tiempos, búsqueda y enlace desde panel.
 - [ ] Fase 2: molienda, sazón y pesaje.
 - [ ] Inventario (4 almacenes) y rendimiento/escandallo.
