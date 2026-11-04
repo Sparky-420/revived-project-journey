@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedCamaraFriaRouteImport } from './routes/_authenticated/camara-fria'
 import { Route as AuthenticatedEquipoRouteImport } from './routes/_authenticated/equipo'
 import { Route as AuthenticatedFase1RouteImport } from './routes/_authenticated/fase1'
 import { Route as AuthenticatedPanelRouteImport } from './routes/_authenticated/panel'
@@ -29,6 +30,11 @@ const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedCamaraFriaRoute = AuthenticatedCamaraFriaRouteImport.update({
+  id: '/camara-fria',
+  path: '/camara-fria',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedEquipoRoute = AuthenticatedEquipoRouteImport.update({
   id: '/equipo',
@@ -49,6 +55,7 @@ const AuthenticatedPanelRoute = AuthenticatedPanelRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/camara-fria': typeof AuthenticatedCamaraFriaRoute
   '/equipo': typeof AuthenticatedEquipoRoute
   '/fase1': typeof AuthenticatedFase1Route
   '/panel': typeof AuthenticatedPanelRoute
@@ -56,6 +63,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/camara-fria': typeof AuthenticatedCamaraFriaRoute
   '/equipo': typeof AuthenticatedEquipoRoute
   '/fase1': typeof AuthenticatedFase1Route
   '/panel': typeof AuthenticatedPanelRoute
@@ -65,20 +73,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/camara-fria': typeof AuthenticatedCamaraFriaRoute
   '/_authenticated/equipo': typeof AuthenticatedEquipoRoute
   '/_authenticated/fase1': typeof AuthenticatedFase1Route
   '/_authenticated/panel': typeof AuthenticatedPanelRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/equipo' | '/fase1' | '/panel'
+  fullPaths: '/' | '/auth' | '/camara-fria' | '/equipo' | '/fase1' | '/panel'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/equipo' | '/fase1' | '/panel'
+  to: '/' | '/auth' | '/camara-fria' | '/equipo' | '/fase1' | '/panel'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/camara-fria'
     | '/_authenticated/equipo'
     | '/_authenticated/fase1'
     | '/_authenticated/panel'
@@ -113,6 +123,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/camara-fria': {
+      id: '/_authenticated/camara-fria'
+      path: '/camara-fria'
+      fullPath: '/camara-fria'
+      preLoaderRoute: typeof AuthenticatedCamaraFriaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/equipo': {
       id: '/_authenticated/equipo'
       path: '/equipo'
@@ -138,12 +155,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCamaraFriaRoute: typeof AuthenticatedCamaraFriaRoute
   AuthenticatedEquipoRoute: typeof AuthenticatedEquipoRoute
   AuthenticatedFase1Route: typeof AuthenticatedFase1Route
   AuthenticatedPanelRoute: typeof AuthenticatedPanelRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCamaraFriaRoute: AuthenticatedCamaraFriaRoute,
   AuthenticatedEquipoRoute: AuthenticatedEquipoRoute,
   AuthenticatedFase1Route: AuthenticatedFase1Route,
   AuthenticatedPanelRoute: AuthenticatedPanelRoute,
