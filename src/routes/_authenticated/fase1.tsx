@@ -98,6 +98,7 @@ function Fase1() {
     toast.success(`Lote ${lot} ingresado a Cámara Fría`);
     setGross(""); setWaste(""); setDose(15); setBags([]); setBagWeight("");
     qc.invalidateQueries({ queryKey: ["phase1"] });
+    qc.invalidateQueries({ queryKey: ["cold-room"] });
   }
 
   if (!can("batches:capture")) {
