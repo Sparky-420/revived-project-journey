@@ -1,5 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { coldRoomQuery } from "@/lib/cold-room-query";
+import { coldRoomStatus } from "@/lib/cold-room";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-auth";
 import { ROLE_LABELS, type Permission } from "@/lib/roles";
@@ -19,9 +21,9 @@ export const Route = createFileRoute("/_authenticated/panel")({
   component: Panel,
 });
 
-const MODULES: { icon: string; title: string; desc: string; need: Permission; to?: "/fase1" }[] = [
+const MODULES: { icon: string; title: string; desc: string; need: Permission; to?: "/fase1" | "/camara-fria" }[] = [
   { icon: "🧪", title: "Fase 1 · Recepción y Curado", desc: "Compra bruta, merma, premix y bolsas fechadas", need: "batches:capture", to: "/fase1" },
-  { icon: "❄️", title: "Cámara Fría", desc: "Bolsas en reposo con semáforo 24–48 h", need: "batches:capture" },
+  { icon: "❄️", title: "Cámara Fría", desc: "Bolsas en reposo con semáforo 24–48 h", need: "batches:capture", to: "/camara-fria" },
   { icon: "🌶️", title: "Fase 2 · Molienda y Embutido", desc: "Sazón, agua helada y tabla de pesaje", need: "batches:capture" },
   { icon: "⚖️", title: "Rendimiento", desc: "Pesaje final en báscula vs. teórico", need: "batches:capture" },
   { icon: "📦", title: "Inventario", desc: "4 almacenes, faltantes y capacidad", need: "inventory:manage" },
@@ -34,6 +36,8 @@ function Panel() {
   const { me, can } = useCurrentUser();
   const qc = useQueryClient();
   const navigate = useNavigate();
+  const cold = useQuery({ ...coldRoomQuery, enabled: can("batches:capture") });
+  const readyKg = (cold.data ?? []).filter((bag) => coldRoomStatus(bag.entered_cold_room_at, Date.now()) === "ready").reduce((sum, bag) => sum + bag.actual_weight_kg, 0);
 
   async function signOut() {
     await qc.cancelQueries();
@@ -71,6 +75,7 @@ function Panel() {
               <h2 className="mt-2 font-bold text-card-foreground">{m.title}</h2>
               <p className="text-sm text-muted-foreground">{ok ? m.desc : "Bloqueado para tu rol"}</p>
               {ok && <p className="mt-2 text-xs text-muted-foreground">{m.to ? "Abrir →" : "Próximamente"}</p>}
+              {ok && m.to === "/camara-fria" && readyKg > 0 && <p className="mt-1 text-xs font-semibold text-cold-ready">{readyKg.toLocaleString("es-MX", { maximumFractionDigits: 3 })} kg listos</p>}
             </>
           );
           const cls = `rounded-xl border border-border bg-card p-4 ${ok ? "" : "opacity-45"}`;
