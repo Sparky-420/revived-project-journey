@@ -36,6 +36,17 @@ export function phase2ForMeat(meatKg: number, waterPct: number) {
   };
 }
 
+/** Recover the clean-meat share of a freely weighed cured bag. */
+export function meatFromCuredBag(curedKg: number, cleanKg: number, premixG: number): number {
+  const total = curedMassKg(cleanKg, premixG);
+  return total > 0 ? curedKg * cleanKg / total : 0;
+}
+
+export function phase2TheoreticalKg(curedKg: number, meatKg: number, waterPct: number): number {
+  const recipe = phase2ForMeat(meatKg, waterPct);
+  return curedKg + (recipe.ajoG + recipe.guajilloG + recipe.pimentonG + recipe.especiasG + recipe.aguaMl) / 1000;
+}
+
 export type RestStatus = "resting" | "ready" | "attention";
 
 /** Cold-room traffic light: <24h resting, 24–48h ready to grind, >48h attention. */
