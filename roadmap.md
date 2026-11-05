@@ -7,5 +7,6 @@
 - [x] Fase 1: recepción, merma, premix y bolsas fechadas.
 - [x] Bolsas de peso libre, accesos rápidos y balance carne + premix con margen ±1%.
 - [x] Cámara fría con semáforo: stock real, tiempos, búsqueda y enlace desde panel.
-- [ ] Fase 2: molienda, sazón y pesaje.
+- [ ] Fase 2: selección de bolsas, retiro atómico, sazón bloqueada y responsables.
+- [ ] Pesaje final: registros de báscula, cierre y rendimiento real contra carne limpia.
 - [ ] Inventario (4 almacenes) y rendimiento/escandallo.

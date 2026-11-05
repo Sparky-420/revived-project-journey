@@ -21,11 +21,11 @@ export const Route = createFileRoute("/_authenticated/panel")({
   component: Panel,
 });
 
-const MODULES: { icon: string; title: string; desc: string; need: Permission; to?: "/fase1" | "/camara-fria" }[] = [
+const MODULES: { icon: string; title: string; desc: string; need: Permission; to?: "/fase1" | "/camara-fria" | "/fase2" | "/rendimiento" }[] = [
   { icon: "🧪", title: "Fase 1 · Recepción y Curado", desc: "Compra bruta, merma, premix y bolsas fechadas", need: "batches:capture", to: "/fase1" },
   { icon: "❄️", title: "Cámara Fría", desc: "Bolsas en reposo con semáforo 24–48 h", need: "batches:capture", to: "/camara-fria" },
-  { icon: "🌶️", title: "Fase 2 · Molienda y Embutido", desc: "Sazón, agua helada y tabla de pesaje", need: "batches:capture" },
-  { icon: "⚖️", title: "Rendimiento", desc: "Pesaje final en báscula vs. teórico", need: "batches:capture" },
+  { icon: "🌶️", title: "Fase 2 · Molienda y Embutido", desc: "Sazón, agua helada y tabla de pesaje", need: "batches:capture", to: "/fase2" },
+  { icon: "⚖️", title: "Rendimiento", desc: "Pesaje final en báscula vs. teórico", need: "batches:capture", to: "/rendimiento" },
   { icon: "📦", title: "Inventario", desc: "4 almacenes, faltantes y capacidad", need: "inventory:manage" },
   { icon: "💰", title: "Costos operativos", desc: "Costo por lote y por kg", need: "finance:costs" },
   { icon: "📈", title: "Márgenes MXN", desc: "Utilidad y escandallo completo", need: "finance:margins" },

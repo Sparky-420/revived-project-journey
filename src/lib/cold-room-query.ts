@@ -4,7 +4,7 @@ import { fifoBags } from "@/lib/cold-room";
 
 async function fetchColdRoom() {
   const page = (start: number) => supabase.from("phase1_bags")
-    .select("id, bag_code, actual_weight_kg, entered_cold_room_at, phase1_batches(lot_number, operator_name)")
+    .select("id, bag_code, actual_weight_kg, entered_cold_room_at, phase1_batches(lot_number, operator_name, clean_weight_kg, premix_total_g)")
     // Phase 1 currently stores available bags as 'resting'; readiness is time-derived.
     .in("status", ["resting", "in_cold_room"])
     .order("entered_cold_room_at").order("id").range(start, start + 499);

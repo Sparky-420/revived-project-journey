@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { coldRoomHours, coldRoomStatus, fifoBags } from "@/lib/cold-room";
 import { can, primaryRole } from "@/lib/roles";
-import { premixForMeat, phase2ForMeat, restStatus, yieldPct, PREMIX } from "@/lib/formula";
+import { premixForMeat, phase2ForMeat, meatFromCuredBag, phase2TheoreticalKg, restStatus, yieldPct, PREMIX } from "@/lib/formula";
 
 describe("roles", () => {
   it("operator cannot edit formulas or see finances", () => {
@@ -46,6 +46,20 @@ describe("formula", () => {
   it("garlic is 120 g per 20 kg", () => {
     expect(phase2ForMeat(20, 10).ajoG).toBeCloseTo(120);
     expect(phase2ForMeat(20, 10).aguaMl).toBeCloseTo(2000);
+  });
+  it("uses clean meat rather than premix as the phase2 ingredient basis", () => {
+    const meat = meatFromCuredBag(20.3, 20, 300);
+    expect(meat).toBeCloseTo(20);
+    expect(phase2ForMeat(meat, 10).ajoG).toBeCloseTo(120);
+    expect(meatFromCuredBag(10.15, 20, 300)).toBeCloseTo(10);
+  });
+  it("preserves every phase2 percentage and the 10–12% water range", () => {
+    expect(phase2ForMeat(20, 12)).toEqual({ ajoG: 120, guajilloG: 300, pimentonG: 80, especiasG: 120, aguaMl: 2400 });
+    expect(phase2ForMeat(20, 10).aguaMl).toBe(2000);
+  });
+  it("includes premix and seasoning in theoretical weight, not in yield denominator", () => {
+    expect(phase2TheoreticalKg(20.3, 20, 10)).toBeCloseTo(22.92);
+    expect(yieldPct(22.92, 20)).toBeCloseTo(114.6);
   });
   it("cold room traffic light", () => {
     expect(restStatus(10)).toBe("resting");

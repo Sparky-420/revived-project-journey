@@ -103,6 +103,135 @@ export type Database = {
         }
         Relationships: []
       }
+      phase2_batches: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          cured_weight_kg: number
+          finished_weight_kg: number | null
+          garlic_g: number
+          guajillo_g: number
+          id: string
+          lot_number: string
+          meat_weight_kg: number
+          operator_id: string
+          operator_name: string
+          paprika_g: number
+          premix_weight_kg: number
+          quality_name: string | null
+          quality_notes: string | null
+          scale_weights_kg: number[]
+          spices_g: number
+          status: string
+          theoretical_weight_kg: number
+          water_ml: number
+          water_pct: number
+          yield_pct: number | null
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          cured_weight_kg: number
+          finished_weight_kg?: number | null
+          garlic_g: number
+          guajillo_g: number
+          id?: string
+          lot_number: string
+          meat_weight_kg: number
+          operator_id?: string
+          operator_name: string
+          paprika_g: number
+          premix_weight_kg: number
+          quality_name?: string | null
+          quality_notes?: string | null
+          scale_weights_kg?: number[]
+          spices_g: number
+          status?: string
+          theoretical_weight_kg: number
+          water_ml: number
+          water_pct: number
+          yield_pct?: number | null
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          cured_weight_kg?: number
+          finished_weight_kg?: number | null
+          garlic_g?: number
+          guajillo_g?: number
+          id?: string
+          lot_number?: string
+          meat_weight_kg?: number
+          operator_id?: string
+          operator_name?: string
+          paprika_g?: number
+          premix_weight_kg?: number
+          quality_name?: string | null
+          quality_notes?: string | null
+          scale_weights_kg?: number[]
+          spices_g?: number
+          status?: string
+          theoretical_weight_kg?: number
+          water_ml?: number
+          water_pct?: number
+          yield_pct?: number | null
+        }
+        Relationships: []
+      }
+      phase2_sources: {
+        Row: {
+          bag_code: string
+          bag_id: string
+          cured_weight_kg: number
+          entered_cold_room_at: string
+          id: string
+          meat_weight_kg: number
+          phase2_batch_id: string
+          reception_name: string | null
+          source_lot: string
+        }
+        Insert: {
+          bag_code: string
+          bag_id: string
+          cured_weight_kg: number
+          entered_cold_room_at: string
+          id?: string
+          meat_weight_kg: number
+          phase2_batch_id: string
+          reception_name?: string | null
+          source_lot: string
+        }
+        Update: {
+          bag_code?: string
+          bag_id?: string
+          cured_weight_kg?: number
+          entered_cold_room_at?: string
+          id?: string
+          meat_weight_kg?: number
+          phase2_batch_id?: string
+          reception_name?: string | null
+          source_lot?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "phase2_sources_bag_id_fkey"
+            columns: ["bag_id"]
+            isOneToOne: true
+            referencedRelation: "phase1_bags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "phase2_sources_phase2_batch_id_fkey"
+            columns: ["phase2_batch_id"]
+            isOneToOne: false
+            referencedRelation: "phase2_batches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -147,6 +276,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      close_phase2: {
+        Args: { p_batch_id: string; p_notes?: string; p_quality_name: string }
+        Returns: undefined
+      }
       has_any_role: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
@@ -154,6 +287,18 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      phase2_scale: {
+        Args: { p_batch_id: string; p_remove_index?: number; p_weight?: number }
+        Returns: undefined
+      }
+      start_phase2: {
+        Args: {
+          p_bag_ids: string[]
+          p_operator_name: string
+          p_water_pct: number
+        }
+        Returns: string
       }
     }
     Enums: {
