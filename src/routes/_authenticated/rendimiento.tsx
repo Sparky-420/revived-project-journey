@@ -52,7 +52,7 @@ function YieldPage() {
     try {
       const result = action === "close"
         ? await supabase.rpc("close_phase2", { p_batch_id: batch.id, p_quality_name: responsible, p_notes: notes })
-        : await supabase.rpc("phase2_scale", { p_batch_id: batch.id, ...(action === "add" ? { p_weight: value } : { p_remove_index: index }) });
+        : await supabase.rpc("phase2_scale", { p_batch_id: batch.id, ...(action === "add" ? { p_weight: value } : typeof index === "number" ? { p_remove_index: index } : {}) });
       if (result.error) throw result.error;
       await qc.invalidateQueries({ queryKey: ["phase2"] });
       setConfirmed(false);
