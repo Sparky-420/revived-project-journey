@@ -36,6 +36,13 @@
       "when": 1793933832005,
       "tag": "0004_lot_level_cold_room",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793934256242,
+      "tag": "0005_allow_phase2_without_rest",
+      "breakpoints": true
     }
   ]
 }
