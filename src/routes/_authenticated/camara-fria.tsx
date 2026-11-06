@@ -76,7 +76,7 @@ function ColdRoom() {
           <div className="flex flex-wrap items-start justify-between gap-2"><h2 className="min-w-0 break-all font-bold text-card-foreground">{bag.lot_number}</h2><b className="shrink-0 text-lg">{kg(bag.available_kg)}</b></div>
           <p className={`mt-2 flex items-center gap-2 text-sm font-semibold ${state?.color ?? ""}`}><Clock3 className="size-4 shrink-0" />{state?.label} · {duration(hours)}</p>
           <p className="mt-1 text-sm text-muted-foreground">{hours < 24 ? `Faltan ${duration(24 - hours)} para molienda` : hours > 48 ? `Excedida por ${duration(hours - 48)}` : "Lista para Fase 2"}</p>
-          <p className="mt-3 break-words text-sm text-muted-foreground">Lote: {bag.phase1_batches?.lot_number ?? "—"} · Responsable: {bag.operator_name ?? "Sin registrar"}</p>
+          <p className="mt-3 break-words text-sm text-muted-foreground">Entraron {kg(bag.cured_weight_kg)} · Retirados {kg(Math.max(0, bag.cured_weight_kg - bag.available_kg))} · Responsable: {bag.operator_name ?? "Sin registrar"}</p>
           <p className="mt-1 text-xs text-muted-foreground">Ingreso: <time dateTime={bag.entered_cold_room_at}>{new Date(bag.entered_cold_room_at).toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" })}</time></p>
         </li>;
       })}
