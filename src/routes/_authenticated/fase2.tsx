@@ -43,7 +43,7 @@ function Phase2() {
   const meat = picked.reduce((sum, x) => sum + meatFromCuredBag(x.kg, x.lot.clean_weight_kg, x.lot.premix_total_g), 0);
   const waterPct = can("water:adjust") ? water : 10;
   const recipe = phase2ForMeat(meat, waterPct);
-  const eligible = bags.filter((bag) => coldRoomStatus(bag.entered_cold_room_at, Date.now()) !== "resting");
+  const eligible = bags;
   const visible = eligible.filter((bag) => bag.lot_number.toLowerCase().includes(search.toLowerCase()));
   const responsible = name.trim() || me?.name || "";
 
@@ -57,7 +57,7 @@ function Phase2() {
       toast.success("Molienda iniciada. Kilos descontados de Cámara Fría.");
       await navigate({ to: "/rendimiento" });
     } catch {
-      toast.error("No se pudo iniciar. Revisa los kilos disponibles y el reposo mínimo de 24 h.");
+      toast.error("No se pudo iniciar. Revisa los kilos disponibles.");
       void qc.invalidateQueries({ queryKey: ["cold-room"] });
     } finally { setBusy(false); }
   }
@@ -75,16 +75,16 @@ function Phase2() {
         <div className="my-3 flex flex-wrap items-center justify-between gap-2 text-sm"><span>{picked.length} lotes · {kg(cured)}</span><Button size="sm" variant="outline" onClick={() => setTake({})} disabled={!picked.length}>Limpiar</Button></div>
         <ul className="max-h-[28rem] space-y-2 overflow-y-auto">
           {visible.map((lot) => {
-            const attention = coldRoomStatus(lot.entered_cold_room_at, Date.now()) === "attention";
+            const st = coldRoomStatus(lot.entered_cold_room_at, Date.now()); const attention = st === "attention";
             const over = num(take[lot.id]) > lot.available_kg + 0.0005;
             return <li key={lot.id} className="rounded-lg border border-border bg-card p-3">
-              <div className="flex flex-wrap items-start justify-between gap-2"><span className="min-w-0"><b className="block break-all text-sm">{lot.lot_number}</b><span className={`block text-xs ${attention ? "text-cold-attention" : "text-cold-ready"}`}>{attention ? "Atención · más de 48 h" : "Listo · 24–48 h"}</span></span><span className="shrink-0 text-right text-sm"><b>{kg(lot.available_kg)}</b><span className="block text-xs text-muted-foreground">disponibles</span></span></div>
+              <div className="flex flex-wrap items-start justify-between gap-2"><span className="min-w-0"><b className="block break-all text-sm">{lot.lot_number}</b><span className={`block text-xs ${attention ? "text-cold-attention" : "text-cold-ready"}`}>{attention ? "Atención · más de 48 h" : st === "resting" ? "En reposo · menos de 24 h" : "Listo · 24–48 h"}</span></span><span className="shrink-0 text-right text-sm"><b>{kg(lot.available_kg)}</b><span className="block text-xs text-muted-foreground">disponibles</span></span></div>
               <div className="mt-2 flex items-center gap-2"><Input aria-label={`Kilos a retirar de ${lot.lot_number}`} inputMode="decimal" placeholder="Kilos a retirar" className={`h-11 ${over ? "border-destructive" : ""}`} value={take[lot.id] ?? ""} onChange={(e) => setTake((t) => ({ ...t, [lot.id]: e.target.value }))} /><Button size="sm" variant="outline" className="h-11 shrink-0" onClick={() => setTake((t) => ({ ...t, [lot.id]: String(lot.available_kg) }))}>Todo</Button></div>
               {over && <p className="mt-1 text-xs text-destructive">Máximo {kg(lot.available_kg)}</p>}
             </li>;
           })}
         </ul>
-        {visible.length === 0 && <p className="py-6 text-sm text-muted-foreground">{eligible.length ? "Sin coincidencias." : "No hay lotes con al menos 24 h de reposo."}</p>}
+        {visible.length === 0 && <p className="py-6 text-sm text-muted-foreground">{eligible.length ? "Sin coincidencias." : "No hay lotes en Cámara Fría."}</p>}
         {picked.some((x) => coldRoomStatus(x.lot.entered_cold_room_at, Date.now()) === "attention") && <p role="alert" className="mt-3 text-sm text-cold-attention">Lotes con más de 48 h: verificar calidad antes de moler.</p>}
       </section>
       <section className="border-t border-border py-5">
