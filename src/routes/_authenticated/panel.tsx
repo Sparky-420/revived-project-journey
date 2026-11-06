@@ -37,7 +37,7 @@ function Panel() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const cold = useQuery({ ...coldRoomQuery, enabled: can("batches:capture") });
-  const readyKg = (cold.data ?? []).filter((bag) => coldRoomStatus(bag.entered_cold_room_at, Date.now()) === "ready").reduce((sum, bag) => sum + bag.actual_weight_kg, 0);
+  const readyKg = (cold.data ?? []).filter((bag) => coldRoomStatus(bag.entered_cold_room_at, Date.now()) === "ready").reduce((sum, bag) => sum + bag.available_kg, 0);
 
   async function signOut() {
     await qc.cancelQueries();

@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/camara-fria")({
 });
 
 const states: { value: RestStatus; label: string; range: string; color: string }[] = [
-  { value: "ready", label: "Listas para moler", range: "24–48 h", color: "text-cold-ready" },
+  { value: "ready", label: "Listos para moler", range: "24–48 h", color: "text-cold-ready" },
   { value: "attention", label: "Atención", range: ">48 h", color: "text-cold-attention" },
   { value: "resting", label: "En reposo", range: "<24 h", color: "text-cold-resting" },
 ];
@@ -44,43 +44,43 @@ function ColdRoom() {
   }, []);
 
   if (!can("batches:capture")) return <main className="p-6 text-foreground">Sin acceso. <Link to="/panel" className="text-primary">← Panel</Link></main>;
-  const total = bags.reduce((sum, bag) => sum + bag.actual_weight_kg, 0);
+  const total = bags.reduce((sum, bag) => sum + bag.available_kg, 0);
   const needle = search.trim().toLocaleLowerCase("es-MX");
   const visible = bags.filter((bag) => (filter === "all" || coldRoomStatus(bag.entered_cold_room_at, now) === filter)
-    && `${bag.bag_code} ${bag.phase1_batches?.lot_number ?? ""}`.toLocaleLowerCase("es-MX").includes(needle));
+    && `${bag.lot_number} ${bag.operator_name ?? ""}`.toLocaleLowerCase("es-MX").includes(needle));
 
   return <main className="mx-auto min-h-screen max-w-3xl bg-background px-4 pb-16 pt-6 text-foreground">
     <Link to="/panel" className="text-sm text-primary">← Panel</Link>
     <header className="mb-6 mt-3 flex items-center justify-between gap-3">
       <h1 className="flex items-center gap-2 text-2xl font-black"><Snowflake className="size-6 shrink-0" />Cámara Fría</h1>
-      <Button variant="outline" size="icon" aria-label="Actualizar bolsas" title="Actualizar bolsas" disabled={isFetching} onClick={() => { setNow(Date.now()); void refetch(); }}><RefreshCw className={`size-4 ${isFetching ? "motion-safe:animate-spin" : ""}`} /></Button>
+      <Button variant="outline" size="icon" aria-label="Actualizar" title="Actualizar" disabled={isFetching} onClick={() => { setNow(Date.now()); void refetch(); }}><RefreshCw className={`size-4 ${isFetching ? "motion-safe:animate-spin" : ""}`} /></Button>
     </header>
     <dl className="mb-6 grid grid-cols-2 gap-x-4 gap-y-5 border-y border-border py-4 sm:grid-cols-4">
-      <div><dt className="text-sm text-muted-foreground">Total en frío</dt><dd className="text-xl font-bold">{kg(total)}</dd><dd className="text-xs text-muted-foreground">{bags.length} bolsas</dd></div>
+      <div><dt className="text-sm text-muted-foreground">Total en frío</dt><dd className="text-xl font-bold">{kg(total)}</dd><dd className="text-xs text-muted-foreground">{bags.length} lotes</dd></div>
       {states.map((state) => {
         const group = bags.filter((bag) => coldRoomStatus(bag.entered_cold_room_at, now) === state.value);
-        return <div key={state.value}><dt className={`text-sm ${state.color}`}>{state.label}</dt><dd className="text-xl font-bold">{kg(group.reduce((sum, bag) => sum + bag.actual_weight_kg, 0))}</dd><dd className="text-xs text-muted-foreground">{group.length} bolsas · {state.range}</dd></div>;
+        return <div key={state.value}><dt className={`text-sm ${state.color}`}>{state.label}</dt><dd className="text-xl font-bold">{kg(group.reduce((sum, bag) => sum + bag.available_kg, 0))}</dd><dd className="text-xs text-muted-foreground">{group.length} lotes · {state.range}</dd></div>;
       })}
     </dl>
-    <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Estado de las bolsas">
+    <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="Estado de los lotes">
       {states.map((state) => <Button key={state.value} size="sm" variant={filter === state.value ? "secondary" : "outline"} aria-pressed={filter === state.value} className={state.color} onClick={() => setFilter(state.value)}>{state.label}</Button>)}
       <Button size="sm" variant={filter === "all" ? "secondary" : "outline"} aria-pressed={filter === "all"} onClick={() => setFilter("all")}>Ver todas</Button>
     </div>
-    <label className="mb-5 flex items-center gap-2 rounded-lg border border-input px-3 py-2"><Search className="size-4 shrink-0 text-muted-foreground" /><input type="search" aria-label="Buscar bolsa o lote" placeholder="Buscar bolsa o lote" value={search} onChange={(e) => setSearch(e.target.value)} className="min-w-0 w-full bg-transparent text-sm text-foreground outline-none" /></label>
+    <label className="mb-5 flex items-center gap-2 rounded-lg border border-input px-3 py-2"><Search className="size-4 shrink-0 text-muted-foreground" /><input type="search" aria-label="Buscar lote" placeholder="Buscar lote" value={search} onChange={(e) => setSearch(e.target.value)} className="min-w-0 w-full bg-transparent text-sm text-foreground outline-none" /></label>
     {isRefetchError && <p role="alert" className="mb-4 text-sm text-destructive">No se pudo actualizar. Se muestran los últimos datos cargados.</p>}
     <ul className="space-y-3">
       {visible.map((bag) => {
         const hours = coldRoomHours(bag.entered_cold_room_at, now);
         const state = states.find((item) => item.value === coldRoomStatus(bag.entered_cold_room_at, now));
         return <li key={bag.id} className="rounded-lg border border-border bg-card p-4">
-          <div className="flex flex-wrap items-start justify-between gap-2"><h2 className="min-w-0 break-all font-bold text-card-foreground">{bag.bag_code}</h2><b className="shrink-0 text-lg">{kg(bag.actual_weight_kg)}</b></div>
+          <div className="flex flex-wrap items-start justify-between gap-2"><h2 className="min-w-0 break-all font-bold text-card-foreground">{bag.lot_number}</h2><b className="shrink-0 text-lg">{kg(bag.available_kg)}</b></div>
           <p className={`mt-2 flex items-center gap-2 text-sm font-semibold ${state?.color ?? ""}`}><Clock3 className="size-4 shrink-0" />{state?.label} · {duration(hours)}</p>
           <p className="mt-1 text-sm text-muted-foreground">{hours < 24 ? `Faltan ${duration(24 - hours)} para molienda` : hours > 48 ? `Excedida por ${duration(hours - 48)}` : "Lista para Fase 2"}</p>
-          <p className="mt-3 break-words text-sm text-muted-foreground">Lote: {bag.phase1_batches?.lot_number ?? "—"} · Responsable: {bag.phase1_batches?.operator_name ?? "Sin registrar"}</p>
+          <p className="mt-3 break-words text-sm text-muted-foreground">Entraron {kg(bag.cured_weight_kg)} · Retirados {kg(Math.max(0, bag.cured_weight_kg - bag.available_kg))} · Responsable: {bag.operator_name ?? "Sin registrar"}</p>
           <p className="mt-1 text-xs text-muted-foreground">Ingreso: <time dateTime={bag.entered_cold_room_at}>{new Date(bag.entered_cold_room_at).toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" })}</time></p>
         </li>;
       })}
     </ul>
-    {visible.length === 0 && <p className="border-t border-border py-8 text-center text-sm text-muted-foreground">{bags.length === 0 ? "Aún no hay bolsas en Cámara Fría." : search ? "No hay bolsas que coincidan con la búsqueda." : "No hay bolsas en este estado."}</p>}
+    {visible.length === 0 && <p className="border-t border-border py-8 text-center text-sm text-muted-foreground">{bags.length === 0 ? "Aún no hay lotes en Cámara Fría." : search ? "No hay lotes que coincidan con la búsqueda." : "No hay lotes en este estado."}</p>}
   </main>;
 }

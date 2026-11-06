@@ -1,18 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-auth";
-import { premixForMeat, curedMassKg, bagWeightWithinTolerance, cleaningYieldPct, PREMIX, BAG_SIZES_KG } from "@/lib/formula";
+import { premixForMeat, curedMassKg, cleaningYieldPct, PREMIX } from "@/lib/formula";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/fase1")({
   head: () => ({
     meta: [
       { title: "Fase 1 · Recepción y Curado · Don Cangrejo Pro" },
-      { name: "description", content: "Captura de compra bruta, merma, premix y bolsas para cámara fría." },
+      { name: "description", content: "Captura de compra bruta, merma, premix y masa curada por lote." },
       { property: "og:title", content: "Fase 1 · Recepción y Curado" },
       { property: "og:description", content: "Recepción, limpieza, curado y porcionado de lotes." },
       { property: "og:type", content: "website" },
@@ -44,8 +43,6 @@ function Fase1() {
   const [gross, setGross] = useState("");
   const [waste, setWaste] = useState("");
   const [dose, setDose] = useState(15);
-  const [bags, setBags] = useState<string[]>([]);
-  const [bagWeight, setBagWeight] = useState("");
   const [saving, setSaving] = useState(false);
 
   const grossKg = n(gross);
@@ -54,22 +51,14 @@ function Fase1() {
   const premix = premixForMeat(clean, dose);
   const cured = curedMassKg(clean, premix.totalG);
 
-  const bagTotal = bags.reduce((a, b) => a + n(b), 0);
-  const balanced = bagWeightWithinTolerance(bagTotal, cured);
-  const valid = grossKg > 0 && wasteKg < grossKg && bags.length > 0 && bags.every((b) => Number.isFinite(n(b)) && n(b) > 0) && balanced;
-
-  function addBag(weight: string) {
-    if (!Number.isFinite(n(weight)) || n(weight) <= 0) return;
-    setBags((xs) => [...xs, String(n(weight))]);
-    setBagWeight("");
-  }
+  const valid = grossKg > 0 && wasteKg < grossKg;
 
   const recent = useQuery({
     queryKey: ["phase1"],
     queryFn: async () => {
       const { data } = await supabase
         .from("phase1_batches")
-        .select("id, lot_number, clean_weight_kg, premix_dose_g_per_kg, operator_name, created_at, phase1_bags(count)")
+        .select("id, lot_number, clean_weight_kg, premix_dose_g_per_kg, operator_name, created_at, cured_weight_kg, available_kg")
         .order("created_at", { ascending: false })
         .limit(10);
       return data ?? [];
@@ -80,23 +69,17 @@ function Fase1() {
     if (!valid || saving || !can("batches:capture")) return;
     setSaving(true);
     const lot = lotCode();
-    const { data: batch, error } = await supabase
+    const { error } = await supabase
       .from("phase1_batches")
       .insert({ lot_number: lot, gross_weight_kg: grossKg, waste_weight_kg: wasteKg, premix_dose_g_per_kg: dose, operator_name: me?.name ?? null })
-      .select("id")
-      .single();
-    if (error || !batch) {
+    if (error) {
       setSaving(false);
       toast.error("No se pudo guardar el lote");
       return;
     }
-    const { error: e2 } = await supabase.from("phase1_bags").insert(
-      bags.map((b, i) => ({ batch_id: batch.id, bag_code: `${lot}-B${i + 1}`, target_weight_kg: n(b), actual_weight_kg: n(b) })),
-    );
     setSaving(false);
-    if (e2) { toast.error("El lote se guardó pero las bolsas no"); return; }
     toast.success(`Lote ${lot} ingresado a Cámara Fría`);
-    setGross(""); setWaste(""); setDose(15); setBags([]); setBagWeight("");
+    setGross(""); setWaste(""); setDose(15);
     qc.invalidateQueries({ queryKey: ["phase1"] });
     qc.invalidateQueries({ queryKey: ["cold-room"] });
   }
@@ -148,37 +131,6 @@ function Fase1() {
         </ul>
       </section>
 
-      <section className="mb-4 rounded-xl border border-border bg-card p-4">
-        <h2 className="mb-1 font-bold text-card-foreground">3 · Porcionado en bolsas</h2>
-        <fieldset disabled={saving} className="min-w-0 space-y-3">
-          <form className="flex flex-wrap items-end gap-2" onSubmit={(e) => { e.preventDefault(); addBag(bagWeight); }}>
-            <label className="min-w-0 flex-1 text-sm text-muted-foreground">Peso de báscula (kg)
-              <input inputMode="decimal" className={input} value={bagWeight} onChange={(e) => setBagWeight(e.target.value)} placeholder="0.000" />
-            </label>
-            <Button type="submit" className="h-12" disabled={!Number.isFinite(n(bagWeight)) || n(bagWeight) <= 0}><Plus className="size-4" /> Agregar bolsa</Button>
-          </form>
-          <div className="flex flex-wrap gap-2">
-            {BAG_SIZES_KG.map((weight) => <Button key={weight} type="button" size="sm" variant="outline" onClick={() => addBag(String(weight))}><Plus className="size-3" />{weight} kg</Button>)}
-          </div>
-        <div className="space-y-2">
-          {bags.map((b, i) => (
-            <div key={i} className="flex items-end gap-2">
-            <label className="min-w-0 flex-1 text-xs text-muted-foreground">Bolsa {i + 1} (kg)
-              <input inputMode="decimal" className={input} value={b}
-                onChange={(e) => setBags((xs) => xs.map((x, j) => (j === i ? e.target.value : x)))} />
-            </label>
-            <Button type="button" variant="outline" size="icon" className="mb-1 shrink-0" aria-label={`Eliminar bolsa ${i + 1}`} title={`Eliminar bolsa ${i + 1}`} onClick={() => setBags((xs) => xs.filter((_, j) => j !== i))}><Trash2 className="size-4" /></Button>
-            </div>
-          ))}
-        </div>
-        </fieldset>
-        <div aria-live="polite" className={`mt-3 space-y-1 text-sm ${bags.length > 0 && !balanced ? "text-destructive" : "text-muted-foreground"}`}>
-          <p>Total en bolsas: {kg(bagTotal)} de {kg(cured)}</p>
-          <p>{bagTotal > cured ? `Exceso: ${kg(bagTotal - cured)}` : `Faltan: ${kg(cured - bagTotal)}`}</p>
-          <p>Margen ±1%: {kg(cured * 0.01)}{balanced ? " · Dentro del margen" : ""}</p>
-        </div>
-      </section>
-
       <Button className="w-full py-6 text-base" disabled={!valid || saving} onClick={save}>
         {saving ? "Guardando…" : "❄️ Ingresar lote a Cámara Fría"}
       </Button>
@@ -189,7 +141,7 @@ function Fase1() {
           <li key={r.id} className="rounded-lg border border-border bg-card p-3 text-sm">
             <b className="text-card-foreground">{r.lot_number}</b>
             <span className="block text-muted-foreground">
-              {kg(Number(r.clean_weight_kg))} limpios · {r.premix_dose_g_per_kg} g/kg · {(r.phase1_bags as unknown as { count: number }[])[0]?.count ?? 0} bolsas · {r.operator_name ?? ""}
+              {kg(Number(r.clean_weight_kg))} limpios · {r.premix_dose_g_per_kg} g/kg · {kg(Number(r.available_kg))} disponibles de {kg(Number(r.cured_weight_kg))} · {r.operator_name ?? ""}
             </span>
           </li>
         ))}
