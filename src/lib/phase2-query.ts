@@ -5,7 +5,7 @@ export const phase2Query = queryOptions({
   queryKey: ["phase2"],
   queryFn: async () => {
     const { data, error } = await supabase.from("phase2_batches")
-      .select("*, phase2_sources(*)").order("created_at", { ascending: false });
+      .select("*, phase2_sources(*), phase2_lot_sources(*)").order("created_at", { ascending: false });
     if (error) throw error;
     return data ?? [];
   },
