@@ -57,8 +57,11 @@ export type Database = {
       }
       phase1_batches: {
         Row: {
+          available_kg: number
           clean_weight_kg: number
           created_at: string
+          cured_weight_kg: number
+          entered_cold_room_at: string
           gross_weight_kg: number
           id: string
           lot_number: string
@@ -72,8 +75,11 @@ export type Database = {
           waste_weight_kg: number
         }
         Insert: {
+          available_kg?: number
           clean_weight_kg?: number
           created_at?: string
+          cured_weight_kg?: number
+          entered_cold_room_at?: string
           gross_weight_kg: number
           id?: string
           lot_number: string
@@ -87,8 +93,11 @@ export type Database = {
           waste_weight_kg?: number
         }
         Update: {
+          available_kg?: number
           clean_weight_kg?: number
           created_at?: string
+          cured_weight_kg?: number
+          entered_cold_room_at?: string
           gross_weight_kg?: number
           id?: string
           lot_number?: string
@@ -180,6 +189,54 @@ export type Database = {
           yield_pct?: number | null
         }
         Relationships: []
+      }
+      phase2_lot_sources: {
+        Row: {
+          cured_weight_kg: number
+          entered_cold_room_at: string
+          id: string
+          meat_weight_kg: number
+          phase1_batch_id: string
+          phase2_batch_id: string
+          reception_name: string | null
+          source_lot: string
+        }
+        Insert: {
+          cured_weight_kg: number
+          entered_cold_room_at: string
+          id?: string
+          meat_weight_kg: number
+          phase1_batch_id: string
+          phase2_batch_id: string
+          reception_name?: string | null
+          source_lot: string
+        }
+        Update: {
+          cured_weight_kg?: number
+          entered_cold_room_at?: string
+          id?: string
+          meat_weight_kg?: number
+          phase1_batch_id?: string
+          phase2_batch_id?: string
+          reception_name?: string | null
+          source_lot?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "phase2_lot_sources_phase1_batch_id_fkey"
+            columns: ["phase1_batch_id"]
+            isOneToOne: false
+            referencedRelation: "phase1_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "phase2_lot_sources_phase2_batch_id_fkey"
+            columns: ["phase2_batch_id"]
+            isOneToOne: false
+            referencedRelation: "phase2_batches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       phase2_sources: {
         Row: {
@@ -298,6 +355,10 @@ export type Database = {
           p_operator_name: string
           p_water_pct: number
         }
+        Returns: string
+      }
+      start_phase2_lots: {
+        Args: { p_items: Json; p_operator_name: string; p_water_pct: number }
         Returns: string
       }
     }
