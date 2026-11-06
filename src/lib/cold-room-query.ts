@@ -2,23 +2,14 @@ import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fifoBags } from "@/lib/cold-room";
 
+// Cold room is tracked per lot: available_kg drops with each partial Phase 2 withdrawal.
 async function fetchColdRoom() {
-  const page = (start: number) => supabase.from("phase1_bags")
-    .select("id, bag_code, actual_weight_kg, entered_cold_room_at, phase1_batches(lot_number, operator_name, clean_weight_kg, premix_total_g)")
-    // Phase 1 currently stores available bags as 'resting'; readiness is time-derived.
-    .in("status", ["resting", "in_cold_room"])
-    .order("entered_cold_room_at").order("id").range(start, start + 499);
-  const first = await page(0);
-  if (first.error) throw first.error;
-  const bags = first.data ?? [];
-  let count = bags.length;
-  while (count === 500) {
-    const next = await page(bags.length);
-    if (next.error) throw next.error;
-    count = next.data?.length ?? 0;
-    bags.push(...(next.data ?? []));
-  }
-  return fifoBags(bags);
+  const { data, error } = await supabase.from("phase1_batches")
+    .select("id, lot_number, available_kg, cured_weight_kg, clean_weight_kg, premix_total_g, operator_name, entered_cold_room_at")
+    .gt("available_kg", 0)
+    .order("entered_cold_room_at").limit(1000);
+  if (error) throw error;
+  return fifoBags((data ?? []).map((l) => ({ ...l, available_kg: Number(l.available_kg), cured_weight_kg: Number(l.cured_weight_kg), clean_weight_kg: Number(l.clean_weight_kg) })));
 }
 
 export const coldRoomQuery = queryOptions({
