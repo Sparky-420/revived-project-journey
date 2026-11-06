@@ -11,7 +11,7 @@
 
 - Roles live in public.user_roles (owner/supervisor/operator) and permissions in src/lib/roles.ts; UI hides locked modules but RLS must enforce every write.
 - Base formulas and plant rules (premix, phase 2, cold-room traffic light, yield) live in src/lib/formula.ts with tests in src/test/rules.test.ts.
-- Cold-room reads share cached query options and include the legacy available status `resting`; readiness is derived from entry time, never persisted by the monitor.
+- Cold room is tracked per lot (phase1_batches.available_kg, decremented by the start_phase2_lots RPC for partial withdrawals); phase1_bags is deprecated. Readiness is derived from entry time, never persisted.
 - PIN/biometric quick unlock is device-local (src/lib/quick-lock.ts) on top of the Google session; it is a convenience lock, not the security boundary.
 - Android APKs use scripts/prepare-android.ts to build an isolated Capacitor shell under /tmp that loads the published app URL, because login and shared data need the online backend.
 - Phase2 writes use authenticated transactional database RPCs with row locks; source snapshots preserve traceability and clean-meat proportion, and final weights stay editable only until closure.
